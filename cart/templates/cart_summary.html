@@ -1,0 +1,248 @@
+{% extends "./base.html"%}
+
+{% block title %}Inicio{% endblock%}
+
+{% block body %}
+<script src="https://sdk.mercadopago.com/js/v2"></script>
+
+  <main>
+    <div class="position-relative overflow-hidden p-3 p-md-5 m-md-3 text-center bg-body-tertiary">
+      <div class="col-md-6 p-lg-5 mx-auto my-5">
+        <h1 class="display-3 fw-bold">Tus compras</h1>
+        </div>
+      </div>
+      <div class="container">
+        <button class="btn btn-primary hBack " type="button">Volver</button>
+        <a class="btn btn-secondary" href="/">
+          Inicio
+        </a>
+          
+      </div>
+    </div>
+
+
+<div class="container">
+    {% if cart_products %}
+      <div class="container px-3 my-5 clearfix">
+        <!-- Shopping cart table -->
+        <div class="card">
+            <div class="card-body">
+                <div class="table-responsive">
+                  <table class="table table-bordered m-0">
+                    <thead>
+                      <tr>
+                        <!-- Set columns width -->
+                        <th class="text-center py-3 px-4" style="min-width: 400px;">Nombre del producto &amp; Detalles</th>
+                        <th class="text-right py-3 px-4" style="width: 100px;">Precio</th>
+                        <th class="text-center py-3 px-4" style="width: 120px;">Cantidad</th>                      
+                        <th class="text-center align-middle py-3 px-0" style="width: 40px;"><a href="#" class="shop-tooltip float-none text-light" title="" data-original-title="Clear cart"><i class="ino ion-md-trash"></i></a></th>
+                      </tr>
+                    </thead>
+
+                    {% for producto in cart_products %}
+                    <div>
+                      <tbody>
+                        <tr>
+                          <td class="p-4">
+                            <div class="media align-items-center">
+                              <div class="media-body">
+                                <h6>{{producto.nombre}}</h6>
+                                <small>
+                                  <span class="text-muted">Codigo: {{producto.codigo}}</span>
+                                  <span class="text-muted">Marca: </span> {{producto.marca}}
+                                </small>
+                              </div>
+                            </div>
+                          </td>
+                          <td class="text-right font-weight-semibold align-middle p-4">${{producto.precio}}</td>
+                          <td class="align-middle p-4">
+                            <select class="form-select form-select-sm" id="qty_cart">
+                              <option selected>
+                                {% for key, value in quantities.items %}
+                                {% if key == producto.codigo|slugify %}
+                                  {{ value }}
+                                {% endif %}
+                                {% endfor %}
+                              </option>
+                              <option value="1">1</option>
+                              <option value="2">2</option>
+                              <option value="3">3</option>
+                              <option value="4">4</option>
+                              <option value="5">5</option>
+                            </select>
+                          </td>    
+                          <td class="text-center align-middle px-0"><button type="button" class="btn-close delete-product" aria-label="Close" data-index="{{producto.codigo}}"></button></td>
+                        </tr>             
+                      </tbody>
+                    </div>
+                    {% endfor %}
+                  </table>
+                </div>
+                <br>
+                <div class="Despacho">
+                  <h5>Despacho</h5>
+                  <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio1" value="option1">
+                    <label class="form-check-label" for="inlineRadio1">Envío a domicilio</label>
+                  </div>
+          
+                  
+                  <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio3" value="option3" disabled>
+                    <label class="form-check-label" for="inlineRadio3">Retiro en tienda</label>
+                  </div>
+                </div><br>
+          
+                <div id="contenido-envio" style="display: none;">
+
+
+                  
+                  <form method="post" action="">
+                    <div class="form-group"> <!-- Full Name -->
+                        <label for="full_name_id" class="control-label">Nombre y apellido</label>
+                        <input type="text" class="form-control" id="full_name" name="full_name">
+                    </div>  <br>  
+                
+                    <div class="form-group"> <!-- Street 1 -->
+                        <label for="street1_id" class="control-label">Direccion</label>
+                        <input type="text" class="form-control" id="direccion" name="direccion" placeholder="Antonio Varas 666, Providencia, Región Metropolitana">
+                    </div>     <br>               
+                                            
+                    <div class="form-group"> <!-- Street 2 -->
+                        <label for="street2_id" class="control-label">Numero</label>
+                        <input type="number" class="form-control" id="numero" name="numero" placeholder="#666">
+                    </div>    <br>
+                
+                    <div class="form-group"> <!-- City-->
+                        <label for="city_id" class="control-label">Comuna</label>
+                        <input type="text" class="form-control" id="comuna" name="comuna" placeholder="Padre Hurtado">
+                    </div>     <br>   
+                    
+                    <div class="form-group">
+                      <label for="region_id" class="control-label">Region</label>
+                      <select name="region" id="region" class="form-control" onchange="mostrarSeleccion()">
+                        <option value=""disabled selected>Seleccionar region</option>
+                        <option value="Arica">Región de Arica y Parinacota</option>
+                        <option value="Tarapacá">Región de Tarapacá</option>
+                        <option value="Antofagasta">Región de Antofagasta</option>
+                        <option value="Atacama">Región de Atacama</option>
+                        <option value="Coquimbo">Región de Coquimbo</option>
+                        <option value="Valparaíso">Región de Valparaíso</option>
+                        <option value="Metropolitana">Región Metropolitana</option>
+                        <option value="O'Higgins">Región de O'Higgins</option>
+                      </select>
+                    </div>
+                    <br>
+                    <div class="total-envio">
+                      <div class="d-flex">
+                        <div class="text-right mt-4">
+                          <label class="text-muted font-weight-normal m-0" id="mensajeSeleccion">Precio total:</label>
+                          <div class="text-large"><strong>Total: $ {{ totals|add:envio }}</strong></div>
+                        </div>
+                      </div>
+                    </div>
+                    <a href="" class="btn btn-primary">Ir a pagar</a>
+
+                    <div id="wallet_container"></div>
+                                           
+                </form>
+                </div>
+                
+              
+              </div>
+          </div>
+      </div>
+      <br>
+
+      {% else %}
+        <h6>No hay nada en tu carrito... ve a la tienda para agregar cosas </h6>
+
+        <a class="icon-link" href="/tienda">
+          Tienda
+          <svg class="bi"><use xlink:href="#chevron-right"/></svg>
+        </a>
+        
+
+    {% endif %}
+</div>
+<br><br><br>
+<script>
+  $(document).on('click', '.delete-product', function(e){
+    e.preventDefault();
+    //var productocodigo = $(this).data('index');
+
+    $.ajax({
+      type: 'POST',
+      url: '{% url "cart_delete" %}',
+      data: {
+        producto_codigo: $(this).data('index'),
+        csrfmiddlewaretoken: '{{ csrf_token }}',
+        action: 'post'
+      },
+      success: function(json){
+        location.reload();
+      },
+      error: function(xhr, errmsg, err){
+
+      }
+
+    })
+  });
+
+</script>
+
+<script>
+  // Obtener el radio button y el contenedor del contenido a mostrar
+  const radioEnvio = document.getElementById('inlineRadio1');
+  const contenidoEnvio = document.getElementById('contenido-envio');
+
+  // Añadir un event listener para el evento 'change' del radio button
+  radioEnvio.addEventListener('change', function() {
+    // Verificar si el radio button está seleccionado
+    if (radioEnvio.checked) {
+      // Mostrar el contenido
+      contenidoEnvio.style.display = 'block';
+    } else {
+      // Ocultar el contenido si no está seleccionado
+      contenidoEnvio.style.display = 'none';
+    }
+  });
+</script>
+
+<script>
+  function mostrarSeleccion() {
+    var seleccion = document.getElementById("region").value;
+    var mensajeSeleccion = document.getElementById("mensajeSeleccion");
+
+    if (seleccion !== "") {
+      mensajeSeleccion.textContent = "Envio: +$5000";
+      // Aquí puedes añadir cualquier otra acción que desees realizar
+    } else {
+      mensajeSeleccion.textContent = ""; // Limpiamos el texto si no hay selección
+    }
+  }
+</script>
+
+<script>
+  const mp = new MercadoPago('TEST-89a9a623-e965-402a-bb9a-900eafe1294b', {
+    locale: 'es-CL'
+  });
+  const bricksBuilder = mp.bricks();
+
+
+  mp.bricks().create("wallet", "wallet_container", {
+   initialization: {
+       preferenceId: "wallet_container",
+       redirectMode: "self"
+   },
+    customization: {
+    texts: {
+      valueProp: 'smart_option',
+    },
+    },
+  });
+</script>
+
+
+</main>
+{% endblock%}
